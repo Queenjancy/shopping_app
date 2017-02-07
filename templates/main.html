@@ -31,28 +31,28 @@
             </div>
         </div>
     </form>
+
     <ul class="list-group shop-list">
     </ul>
-
-    <div class="stest">
-
-    </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
 
 <script>
-    function add_item(text) {
-        $(".shop-list").prepend("<li class='list-group-item'><span>" + text + "</span><a href='#'>Delete</a></li>");
+    function add_item(id, text) {
+        $(".shop-list").prepend("<li class='list-group-item' data-id='" + id + "'><span>" + text + "</span><a href='#'>Delete</a></li>");
     }
-    add_item("Eggs");
-    add_item("Spinach");
-    add_item("Milk");
 
     $(".shop-list").on("click", "a", function() {
-        var text = $(this).parent().find("span").text();
-        alert(text);
+        var id = $(this).parent().attr("data-id");
+        alert(id);
     });
+
+    $.ajax({url: "/get_items", success: function (response) {
+        response.forEach(function(item) {
+            add_item(item["id"], item["text"]);
+        });
+    }});
 </script>
 
 </body>

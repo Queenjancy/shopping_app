@@ -1,10 +1,10 @@
+import flask
 import logging
 
-from flask import Flask
 from google.appengine.api import users
 from google.appengine.ext import ndb
 
-app = Flask(__name__)
+app = flask.Flask(__name__)
 
 
 class PageVisit(ndb.Model):
@@ -12,6 +12,21 @@ class PageVisit(ndb.Model):
 
 
 @app.route('/')
+def main():
+    return flask.render_template('main.html')
+
+
+@app.route('/get_items')
+def get_items():
+    items = [
+        {'id': 1, 'text': 'Eggs'},
+        {'id': 2, 'text': 'Spinach'},
+        {'id': 3, 'text': 'Milk'},
+    ]
+    return flask.jsonify(items)
+
+
+@app.route('/hello')
 def hello_world():
     # User authentication.
     user = users.get_current_user()
