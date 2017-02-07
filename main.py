@@ -11,6 +11,11 @@ class PageVisit(ndb.Model):
     timestamp = ndb.DateTimeProperty(auto_now_add=True)
 
 
+class ShopItem(ndb.Model):
+    timestamp = ndb.DateTimeProperty(auto_now_add=True)
+    text = ndb.StringProperty()
+
+
 @app.route('/')
 def main():
     return flask.render_template('main.html')
@@ -18,12 +23,26 @@ def main():
 
 @app.route('/get_items')
 def get_items():
-    items = [
-        {'id': 1, 'text': 'Eggs'},
-        {'id': 2, 'text': 'Spinach'},
-        {'id': 3, 'text': 'Milk'},
-    ]
-    return flask.jsonify(items)
+    ndb_items = ShopItem.query().order(ShopItem.timestamp).fetch(1000)
+    json_items = []
+    for ndb_item in ndb_items:
+        json_items.append({'id': ndb_item.key.integer_id(), 'text': ndb_item.text})
+    return flask.jsonify(json_items)
+
+
+@app.route('/create_item', methods=['POST'])
+def create_item():
+    text = flask.request.form['text']
+    key = ShopItem(text=text).put()
+    return flask.jsonify({'id': key.integer_id()})
+
+
+@app.route('/delete_item', methods=['POST'])
+def delete_item():
+    integer_id = int(flask.request.form['id'])
+    key = ndb.Key(ShopItem, integer_id)
+    key.delete()
+    return flask.jsonify({})
 
 
 @app.route('/hello')
