@@ -13,12 +13,45 @@ class PageVisit(ndb.Model):
 
 class ShopItem(ndb.Model):
     timestamp = ndb.DateTimeProperty(auto_now_add=True)
+    user_email = ndb.StringProperty()
     text = ndb.StringProperty()
+
+
+def get_user_auth(is_required):
+    user = users.get_current_user()
+    if user is None:
+        if is_required:
+            raise ValueError('Authentication required')
+        login_url = users.create_login_url('/')
+        return None, login_url
+    else:
+        email = user.email()
+        logout_url = users.create_logout_url('/')
+        return email, logout_url
 
 
 @app.route('/')
 def main():
-    return flask.render_template('main.html')
+    visit_counter = PageVisit.query().count() + 1
+    visit_record = PageVisit()
+    visit_record.put()
+
+    auth = get_user_auth(is_required=False)
+    if auth[0] is None:
+        return flask.render_template(
+            'main.html',
+            logged_in=False,
+            login_url=auth[1],
+            visit_counter=visit_counter
+        )
+    else:
+        return flask.render_template(
+            'main.html',
+            logged_in=True,
+            user_email=auth[0],
+            logout_url=auth[1],
+            visit_counter=visit_counter
+        )
 
 
 @app.route('/get_items')
@@ -43,33 +76,6 @@ def delete_item():
     key = ndb.Key(ShopItem, integer_id)
     key.delete()
     return flask.jsonify({})
-
-
-@app.route('/hello')
-def hello_world():
-    # User authentication.
-    user = users.get_current_user()
-    if user is not None:
-        email = user.email()
-        logout_url = users.create_logout_url('/')
-        greeting = 'Welcome, {0}! (<a href="{1}">Sign out</a>)'.format(email, logout_url)
-    else:
-        login_url = users.create_login_url('/')
-        greeting = '<a href="{0}">Sign in</a>'.format(login_url)
-
-    # Visit counter.
-    visited_so_far = PageVisit.query().count() + 1
-    visit_record = PageVisit()
-    visit_record.put()
-
-    return """
-        <html>
-        <body>
-        <p>{0}</p>
-        <p>Visited {1} times.</p>
-        </body>
-        </html>
-        """.format(greeting, visited_so_far)
 
 
 @app.errorhandler(500)

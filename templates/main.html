@@ -23,6 +23,11 @@
 <div class="container" style="max-width: 600px;">
     <h2>Shopping list</h2>
 
+    {% if not logged_in %}
+    <p>Welcome to the best ever premium shopping list app. Period.</p>
+    <a href="{{ login_url }}" class="btn btn-primary">Log in with Google account</a>
+    {% else %}
+    <p>Logged in as {{ user_email }} (<a href="{{ logout_url }}">Sign out</a>)</p>
     <form id="shop-form" method="POST" style="margin-top:1em; margin-bottom:1em;">
         <div class="input-group">
             <input name="text" type="text" class="form-control" placeholder="Something to buy" autofocus>
@@ -31,9 +36,12 @@
             </div>
         </div>
     </form>
+    {% endif %}
 
     <ul class="list-group shop-list">
     </ul>
+
+    <p style="text-align: center">Visited {{ visit_counter }} times.</p>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
