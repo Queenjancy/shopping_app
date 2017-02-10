@@ -56,7 +56,8 @@ def main():
 
 @app.route('/get_items')
 def get_items():
-    ndb_items = ShopItem.query().order(ShopItem.timestamp).fetch(1000)
+    auth = get_user_auth(is_required=True)
+    ndb_items = ShopItem.query(ShopItem.user_email == auth[0]).order(ShopItem.timestamp).fetch(1000)
     json_items = []
     for ndb_item in ndb_items:
         json_items.append({'id': ndb_item.key.integer_id(), 'text': ndb_item.text})
@@ -65,15 +66,19 @@ def get_items():
 
 @app.route('/create_item', methods=['POST'])
 def create_item():
+    auth = get_user_auth(is_required=True)
     text = flask.request.form['text']
-    key = ShopItem(text=text).put()
+    key = ShopItem(user_email=auth[0], text=text).put()
     return flask.jsonify({'id': key.integer_id()})
 
 
 @app.route('/delete_item', methods=['POST'])
 def delete_item():
+    auth = get_user_auth(is_required=True)
     integer_id = int(flask.request.form['id'])
     key = ndb.Key(ShopItem, integer_id)
+    if key.get().user_email != auth[0]:
+        raise ValueError('Security violation')
     key.delete()
     return flask.jsonify({})
 
