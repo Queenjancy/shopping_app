@@ -15,6 +15,10 @@
             position: absolute;
             right: 1em;
         }
+        .delete-all {
+            float: right;
+            margin-right: 1em;
+        }
     </style>
 </head>
 
@@ -25,12 +29,12 @@
 
     {% if not logged_in %}
     <p>Welcome to the best ever premium shopping list app. Period.</p>
-    <a href="{{ login_url }}" class="btn btn-primary">Log in with Google account</a>
+    <p><a href="{{ login_url }}" class="btn btn-primary">Log in with Google account</a>
     {% else %}
     <p>Logged in as {{ user_email }} (<a href="{{ logout_url }}">Sign out</a>)</p>
     <form id="shop-form" method="POST" style="margin-top:1em; margin-bottom:1em;">
         <div class="input-group">
-            <input name="text" type="text" class="form-control" placeholder="Something to buy" autofocus>
+            <input name="text" type="text" class="form-control" placeholder="Something to buy" maxlength="50" autofocus>
             <div class="input-group-btn">
                 <button type="submit" class="btn btn-primary">Add</button>
             </div>
@@ -41,7 +45,10 @@
     <ul class="list-group shop-list">
     </ul>
 
-    <p style="text-align: center">Visited {{ visit_counter }} times.</p>
+    <p {% if logged_in %} style="text-align: center" {% endif %}>
+        <span style="color: #999">Visited {{ visit_counter }} times.</span>
+        <a href='#' class="delete-all">Erase List</a>
+    </p>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
@@ -70,6 +77,13 @@
         var id = $(this).parent().attr("data-id");
         $(this).parent().remove();
         $.post("/delete_item", {id: id});
+        return false;  // Prevent link action
+    });
+
+    $(".delete-all").click(function() {
+        // Erase list
+        $(".shop-list li").remove();
+        $.post("/delete_all", {});
         return false;  // Prevent link action
     });
 

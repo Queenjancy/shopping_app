@@ -83,6 +83,14 @@ def delete_item():
     return flask.jsonify({})
 
 
+@app.route('/delete_all', methods=['POST'])
+def delete_all():
+    auth = get_user_auth(is_required=True)
+    query_iterator = ShopItem.query(ShopItem.user_email == auth[0]).iter(keys_only=True)
+    ndb.delete_multi(query_iterator)
+    return flask.jsonify({})
+
+
 @app.errorhandler(500)
 def server_error(e):
     # Log the error and stacktrace.
