@@ -29,8 +29,8 @@
     <h2>Shopping list</h2>
 
     {% if not logged_in %}
-    <p>Welcome to the best premium shopping list app ever. Period.</p>
-    <p><a href="{{ login_url }}" class="btn btn-primary">Log in with Google account</a>
+    <p>Welcome to the best premium shopping list app ever.</p>
+    <p><a href="{{ login_url }}" class="btn btn-primary">Log in with Google account</a></p>
     {% else %}
     <p>Logged in as {{ user_email }} (<a href="{{ logout_url }}">Sign out</a>)</p>
     <form id="shop-form" method="POST" style="margin-top:1em; margin-bottom:1em;">
