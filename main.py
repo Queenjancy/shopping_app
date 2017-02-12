@@ -83,6 +83,18 @@ def delete_item():
     return flask.jsonify({})
 
 
+@app.route('/edit_item', methods=['POST'])
+def edit_item():
+    auth = get_user_auth(is_required=True)
+    integer_id = int(flask.request.form['id'])
+    entity = ndb.Key(ShopItem, integer_id).get()
+    if entity.user_email != auth[0]:
+        raise ValueError('Security violation')
+    entity.text = flask.request.form['text']
+    entity.put()
+    return flask.jsonify({})
+
+
 @app.route('/delete_all', methods=['POST'])
 def delete_all():
     auth = get_user_auth(is_required=True)

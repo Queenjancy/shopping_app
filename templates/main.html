@@ -11,8 +11,9 @@
     <link href="/static/bootstrap.min.css" rel="stylesheet">
 
     <style type="text/css">
-        .shop-list a {
+        .shop-list .actions {
             position: absolute;
+            color: #999;
             right: 1em;
         }
         .delete-all {
@@ -34,7 +35,7 @@
     <p>Logged in as {{ user_email }} (<a href="{{ logout_url }}">Sign out</a>)</p>
     <form id="shop-form" method="POST" style="margin-top:1em; margin-bottom:1em;">
         <div class="input-group">
-            <input name="text" type="text" class="form-control" placeholder="Something to buy" maxlength="50" autofocus>
+            <input name="text" type="text" class="form-control" placeholder="Something to buy" maxlength="50" autofocus/>
             <div class="input-group-btn">
                 <button type="submit" class="btn btn-primary">Add</button>
             </div>
@@ -55,7 +56,40 @@
 
 <script>
     function add_item(id, text) {
-        $(".shop-list").prepend("<li class='list-group-item' data-id='" + id + "'><span>" + text + "</span><a href='#'>Delete</a></li>");
+        $(".shop-list").prepend(
+            "<li class='list-group-item' data-id='" + id + "'>" +
+            "<div class='static'>" +
+            "<span class='text'>" + text + "</span>" +
+            "<span class='actions'><a href='#' class='act-edit'>Edit</a> | <a href='#' class='act-delete'>Delete</a></span>" +
+            "</div>" +
+            "<form class='edit-form' method='POST' style='display: none'>" +
+            "<div class='input-group'>" +
+            "<input name='text' type='text' class='form-control edit-text' maxlength='50'/>" +
+            "<div class='input-group-btn'>" +
+            "<button type='submit' class='btn btn-primary'>Save</button>" +
+            "</div>" +
+            "</div>" +
+            "</form>" +
+            "</li>"
+        );
+    }
+
+    function toggle_edit(list_item) {
+        var static_block = list_item.find(".static");
+        var edit_block = list_item.find(".edit-form");
+        var text;
+        if (edit_block.css("display") == "none") {
+            text = static_block.find(".text").text();
+            static_block.css("display", "none");
+            edit_block.css("display", "block");
+            edit_block.find(".edit-text").val(text);
+        } else {
+            text = edit_block.find(".edit-text").val();
+            edit_block.css("display", "none");
+            static_block.css("display", "block");
+            static_block.find(".text").text(text);
+        }
+        return text;
     }
 
     $("#shop-form").submit(function(event) {
@@ -72,10 +106,27 @@
         });
     });
 
-    $(".shop-list").on("click", "a", function() {
+    $(".shop-list").on("click", ".act-edit", function() {
+        // Edit item
+        var list_item = $(this).parent().parent().parent();
+        toggle_edit(list_item);
+        return false;  // Prevent link action
+    });
+
+    $(".shop-list").on("submit", ".edit-form", function(event) {
+        // Save item
+        event.preventDefault();  // Don't submit the form
+        var list_item = $(this).parent();
+        var id = list_item.attr("data-id");
+        var text = toggle_edit(list_item);
+        $.post("/edit_item", {id: id, text: text});
+    });
+
+    $(".shop-list").on("click", ".act-delete", function() {
         // Delete item
-        var id = $(this).parent().attr("data-id");
-        $(this).parent().remove();
+        var list_item = $(this).parent().parent().parent();
+        var id = list_item.attr("data-id");
+        list_item.remove();
         $.post("/delete_item", {id: id});
         return false;  // Prevent link action
     });
