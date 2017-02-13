@@ -6,7 +6,7 @@ https://shopping-list-157818.appspot.com/
 
 ### Installation instructions
 
-1. (If you already have Python App Engine SDK installed, skip to step 2)
+1. (If you already have Python App Engine SDK installed, skip to step 2.)
 Follow instructions here: https://cloud.google.com/appengine/docs/python/download
 
     ```
@@ -31,7 +31,7 @@ Follow instructions here: https://cloud.google.com/appengine/docs/python/downloa
 4. Open browser at http://localhost:8080 and ensure it works
 5. Stop local server
 6. Create project using Google Cloud Console https://console.cloud.google.com/iam-admin/projects
-7. Upload the code and get app running
+7. Upload code and get app running
 
     ```
     gcloud app deploy
